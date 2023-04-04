@@ -125,6 +125,9 @@ import static org.apache.commons.lang3.StringUtils.*;
 import static org.apache.commons.lang3.time.DateUtils.addHours;
 import static org.apache.commons.lang3.time.DateUtils.truncate;
 
+import alfio.manager.support.reservation.ReservationEmailContentHelper;
+
+
 @Component
 @Transactional
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -155,7 +158,7 @@ public class TicketReservationManager {
     private final TransactionTemplate requiresNewTransactionTemplate;
     private final TransactionTemplate serializedTransactionTemplate;
     private final TransactionTemplate nestedTransactionTemplate;
-    private final WaitingQueueManager waitingQueueManager;
+    private final WaitingQueueManagerReservation waitingQueueManager;
     private final TicketFieldRepository ticketFieldRepository;
     private final AdditionalServiceRepository additionalServiceRepository;
     private final AdditionalServiceItemRepository additionalServiceItemRepository;
@@ -180,6 +183,8 @@ public class TicketReservationManager {
     private final ReservationAuditingHelper auditingHelper;
     private final ReservationFinalizer reservationFinalizer;
 
+    private final ReservationEmailContentHelper reservationEmailContentHelper;
+
     public TicketReservationManager(EventRepository eventRepository,
                                     OrganizationRepository organizationRepository,
                                     TicketRepository ticketRepository,
@@ -195,7 +200,7 @@ public class TicketReservationManager {
                                     MessageSourceManager messageSourceManager,
                                     TemplateManager templateManager,
                                     PlatformTransactionManager transactionManager,
-                                    WaitingQueueManager waitingQueueManager,
+                                    WaitingQueueManagerReservation waitingQueueManager,
                                     TicketFieldRepository ticketFieldRepository,
                                     AdditionalServiceRepository additionalServiceRepository,
                                     AdditionalServiceItemRepository additionalServiceItemRepository,
@@ -216,6 +221,7 @@ public class TicketReservationManager {
                                     ReservationCostCalculator reservationCostCalculator,
                                     ReservationEmailContentHelper reservationHelper,
                                     ReservationFinalizer reservationFinalizer,
+                                    ReservationEmailContentHelper reservationEmailContentHelper,
                                     OrderSummaryGenerator orderSummaryGenerator) {
         this.eventRepository = eventRepository;
         this.organizationRepository = organizationRepository;
@@ -260,6 +266,7 @@ public class TicketReservationManager {
         this.reservationHelper = reservationHelper;
         this.auditingHelper = new ReservationAuditingHelper(auditingRepository);
         this.reservationFinalizer = reservationFinalizer;
+        this.reservationEmailContentHelper = reservationEmailContentHelper;
     }
 
     private String createSubscriptionReservation(SubscriptionDescriptor subscriptionDescriptor,
@@ -2419,5 +2426,16 @@ public class TicketReservationManager {
             userId = userRepository.findPublicUserIdByUsername(principal.getName()).orElse(null);
         }
         return userId;
+    }
+
+    void sendTicketToAttendees(Event event, TicketReservation reservation, Predicate<Ticket> matcher) {
+        ticketRepository.findTicketsInReservation(reservation.getId())
+            .stream()
+            .filter(matcher)
+            .forEach(t -> {
+                Locale locale = LocaleUtil.forLanguageTag(t.getUserLanguage());
+                var additionalInfo = retrieveAttendeeAdditionalInfoForTicket(t);
+                reservationEmailContentHelper.sendTicketByEmail(t, locale, event, getTicketEmailGenerator(event, reservation, locale, additionalInfo));
+            });
     }
 }

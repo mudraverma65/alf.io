@@ -271,7 +271,7 @@ public class AdminReservationManager {
             .map(pair -> {
                 Event event = pair.getLeft().event().orElseThrow();
                 TicketReservation reservation = pair.getRight();
-                sendTicketToAttendees(event, reservation, t -> t.getAssigned() && ids.contains(t.getId()));
+                ticketReservationManager.sendTicketToAttendees(event, reservation, t -> t.getAssigned() && ids.contains(t.getId()));
                 return Result.success(true);
             }).orElseGet(() -> Result.error(ErrorCode.EventError.NOT_FOUND));
     }
@@ -287,7 +287,7 @@ public class AdminReservationManager {
                     ticketReservationManager.sendConfirmationEmail(purchaseContext, reservation, LocaleUtil.forLanguageTag(reservation.getUserLanguage()), username);
                 }
                 if(notification.isAttendees() && purchaseContextType == PurchaseContextType.event) {
-                    sendTicketToAttendees(purchaseContext.event().orElseThrow(), reservation, Ticket::getAssigned);
+                    ticketReservationManager.sendTicketToAttendees(purchaseContext.event().orElseThrow(), reservation, Ticket::getAssigned);
                 }
                 return Result.success(true);
             }).orElseGet(() -> Result.error(ErrorCode.EventError.NOT_FOUND));
@@ -297,17 +297,6 @@ public class AdminReservationManager {
     private Optional<Pair<PurchaseContext, TicketReservation>> getEventTicketReservationPair(PurchaseContextType purchaseContextType, String publicIdentifier, String reservationId, String username) {
         return purchaseContextManager.findBy(purchaseContextType, publicIdentifier)
             .flatMap(ev -> ticketReservationRepository.findOptionalReservationById(reservationId).map(r -> Pair.of(ev, r)));
-    }
-
-    private void sendTicketToAttendees(Event event, TicketReservation reservation, Predicate<Ticket> matcher) {
-        ticketRepository.findTicketsInReservation(reservation.getId())
-            .stream()
-            .filter(matcher)
-            .forEach(t -> {
-                Locale locale = LocaleUtil.forLanguageTag(t.getUserLanguage());
-                var additionalInfo = ticketReservationManager.retrieveAttendeeAdditionalInfoForTicket(t);
-                reservationEmailContentHelper.sendTicketByEmail(t, locale, event, ticketReservationManager.getTicketEmailGenerator(event, reservation, locale, additionalInfo));
-            });
     }
 
     private Result<Boolean> performUpdate(String reservationId, PurchaseContext purchaseContext, TicketReservation r, AdminReservationModification arm, String username) {
