@@ -183,7 +183,7 @@ abstract class AbstractFormBasedWebSecurity {
             HttpServletResponse res = (HttpServletResponse) servletResponse;
             var reqUri = req.getRequestURI();
 
-            if (isGetRequestAndRequiresCsrfToken(reqUri)) {
+            if (isGetRequestAndRequiresCsrfToken(reqUri, req)) {
                 CsrfToken csrf = csrfTokenRepository.loadToken(req);
                 if (csrf == null) {
                     csrf = csrfTokenRepository.generateToken(req);
@@ -198,7 +198,7 @@ abstract class AbstractFormBasedWebSecurity {
         };
     }
 
-    private boolean isGetRequestAndRequiresCsrfToken(String reqUri) {
+    private boolean isGetRequestAndRequiresCsrfToken(String reqUri, HttpServletRequest req) {
         return ("GET".equalsIgnoreCase(req.getMethod()) &&
             (reqUri.startsWith(API_V2_PUBLIC_PATH) ||
                 reqUri.startsWith(ADMIN_API) ||
@@ -216,13 +216,6 @@ abstract class AbstractFormBasedWebSecurity {
 
     private void addCsrfTokenToCookie(HttpServletResponse res, CsrfToken csrf) {
         addCookie(res, csrf);
-    }
-
-    private void addCookie(HttpServletResponse res, CsrfToken csrf) {
-        Cookie cookie = new Cookie(CSRF_COOKIE, csrf.getToken());
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        res.addCookie(cookie);
     }
 
     private static void authorizeRequests(ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry auth) {

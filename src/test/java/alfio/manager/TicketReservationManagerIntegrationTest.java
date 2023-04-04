@@ -93,7 +93,7 @@ class TicketReservationManagerIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private ConfigurationRepository configurationRepository;
     @Autowired
-    private WaitingQueueManager waitingQueueManager;
+    private WaitingQueueManagerReservation waitingQueueManagerReservation;
     @Autowired
     private EventRepository eventRepository;
     @Autowired
@@ -586,7 +586,7 @@ class TicketReservationManagerIntegrationTest extends BaseIntegrationTest {
         PaymentResult result = ticketReservationManager.performPayment(specification, reservationCost, PaymentProxy.OFFLINE, PaymentMethod.BANK_TRANSFER, null);
         assertTrue(result.isSuccessful());
         ticketReservationManager.deleteOfflinePayment(event, reservationId, false, false, false, null);
-        waitingQueueManager.distributeSeats(event);
+        waitingQueueManagerReservation.distributeSeats(event);
 
         mod = new TicketReservationWithOptionalCodeModification(tr, Optional.empty());
         reservationId = ticketReservationManager.createTicketReservation(event, Collections.singletonList(mod), Collections.emptyList(), DateUtils.addDays(new Date(), 1), Optional.empty(), Locale.ENGLISH, false, null);

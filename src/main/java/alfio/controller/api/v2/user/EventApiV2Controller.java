@@ -79,7 +79,7 @@ public class EventApiV2Controller {
     private final MessageSourceManager messageSourceManager;
     private final AdditionalServiceRepository additionalServiceRepository;
     private final AdditionalServiceTextRepository additionalServiceTextRepository;
-    private final WaitingQueueManager waitingQueueManager;
+    private final WaitingQueueManagerSubscription waitingQueueManagerSubscription;
     private final I18nManager i18nManager;
     private final TicketCategoryRepository ticketCategoryRepository;
     private final TicketRepository ticketRepository;
@@ -100,7 +100,7 @@ public class EventApiV2Controller {
                                 MessageSourceManager messageSourceManager,
                                 AdditionalServiceRepository additionalServiceRepository,
                                 AdditionalServiceTextRepository additionalServiceTextRepository,
-                                WaitingQueueManager waitingQueueManager,
+                                WaitingQueueManagerSubscription waitingQueueManagerSubscription,
                                 I18nManager i18nManager,
                                 TicketCategoryRepository ticketCategoryRepository,
                                 TicketRepository ticketRepository,
@@ -120,7 +120,7 @@ public class EventApiV2Controller {
         this.messageSourceManager = messageSourceManager;
         this.additionalServiceRepository = additionalServiceRepository;
         this.additionalServiceTextRepository = additionalServiceTextRepository;
-        this.waitingQueueManager = waitingQueueManager;
+        this.waitingQueueManagerSubscription = waitingQueueManagerSubscription;
         this.i18nManager = i18nManager;
         this.ticketCategoryRepository = ticketCategoryRepository;
         this.ticketRepository = ticketRepository;
@@ -170,7 +170,7 @@ public class EventApiV2Controller {
             if (bindingResult.hasErrors()) {
                 return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ValidatedResponse.toResponse(bindingResult, null));
             } else {
-                var subscriptionResult = waitingQueueManager.subscribe(event, subscription.toCustomerName(event), subscription.getEmail(), subscription.getSelectedCategory(), subscription.getUserLanguage());
+                var subscriptionResult = waitingQueueManagerSubscription.subscribe(event, subscription.toCustomerName(event), subscription.getEmail(), subscription.getSelectedCategory(), subscription.getUserLanguage());
                 return ResponseEntity.ok(new ValidatedResponse<>(ValidationResult.success(), subscriptionResult));
             }
         });

@@ -17,6 +17,7 @@
 package alfio.manager.system;
 
 import alfio.model.Configurable;
+import alfio.model.PurchaseContext;
 import alfio.model.system.ConfigurationKeys;
 import alfio.repository.user.OrganizationRepository;
 import org.apache.commons.lang3.ArrayUtils;
@@ -48,10 +49,14 @@ class SmtpMailer extends BaseMailer {
     private static final Logger log = LoggerFactory.getLogger(SmtpMailer.class);
     private final ConfigurationManager configurationManager;
 
+    private final PurchaseContext purchaseContext;
+
     SmtpMailer(ConfigurationManager configurationManager,
-               OrganizationRepository organizationRepository) {
+               OrganizationRepository organizationRepository,
+               PurchaseContext purchaseContext) {
         super(organizationRepository);
         this.configurationManager = configurationManager;
+        this.purchaseContext = purchaseContext;
     }
 
     @Override
@@ -68,7 +73,7 @@ class SmtpMailer extends BaseMailer {
                     : new MimeMessageHelper(mimeMessage, UTF_8.name());
             message.setSubject(subject);
             message.setFrom(conf.get(SMTP_FROM_EMAIL).getRequiredValue(), fromName);
-            setReplyToIfPresent(conf, configurable.getOrganizationId(), replyTo -> {
+            setReplyToIfPresent(conf, purchaseContext.getOrganizationId(), replyTo -> {
                 try {
                     message.setReplyTo(replyTo);
                 } catch (MessagingException e) {

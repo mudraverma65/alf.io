@@ -61,7 +61,7 @@ public class AdditionalServiceApiControllerPostMapping {
     private final EventRepository eventRepository;
     private final AdditionalServiceManager additionalServiceManager;
 
-    public AdditionalServiceApiController(EventManager eventManager,
+    public AdditionalServiceApiControllerPostMapping(EventManager eventManager,
                                           EventRepository eventRepository,
                                           AdditionalServiceManager additionalServiceManager) {
         this.eventManager = eventManager;

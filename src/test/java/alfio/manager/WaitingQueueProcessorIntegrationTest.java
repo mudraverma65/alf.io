@@ -84,7 +84,7 @@ class WaitingQueueProcessorIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private WaitingQueueSubscriptionProcessor waitingQueueSubscriptionProcessor;
     @Autowired
-    private WaitingQueueManager waitingQueueManager;
+    private WaitingQueueManagerSubscription waitingQueueManagerSubscription;
     @Autowired
     private WaitingQueueRepository waitingQueueRepository;
     @Autowired
@@ -113,8 +113,8 @@ class WaitingQueueProcessorIntegrationTest extends BaseIntegrationTest {
                         DESCRIPTION, BigDecimal.TEN, false, "", false, null, null, null, null, null, 0, null, null, AlfioMetadata.empty()));
         Pair<Event, String> pair = initEvent(categories, organizationRepository, userManager, eventManager, eventRepository);
         Event event = pair.getKey();
-        waitingQueueManager.subscribe(event, new CustomerName("Giuseppe Garibaldi", "Giuseppe", "Garibaldi", event.mustUseFirstAndLastName()), "peppino@garibaldi.com", null, Locale.ENGLISH);
-        waitingQueueManager.subscribe(event, new CustomerName("Nino Bixio", "Nino", "Bixio", event.mustUseFirstAndLastName()), "bixio@mille.org", null, Locale.ITALIAN);
+        waitingQueueManagerSubscription.subscribe(event, new CustomerName("Giuseppe Garibaldi", "Giuseppe", "Garibaldi", event.mustUseFirstAndLastName()), "peppino@garibaldi.com", null, Locale.ENGLISH);
+        waitingQueueManagerSubscription.subscribe(event, new CustomerName("Nino Bixio", "Nino", "Bixio", event.mustUseFirstAndLastName()), "bixio@mille.org", null, Locale.ITALIAN);
         assertEquals(2, (int) waitingQueueRepository.countWaitingPeople(event.getId()));
 
         waitingQueueSubscriptionProcessor.distributeAvailableSeats(event);
@@ -236,9 +236,9 @@ class WaitingQueueProcessorIntegrationTest extends BaseIntegrationTest {
         ticketRepository.updateTicketsStatusWithReservationId(reservationId, Ticket.TicketStatus.ACQUIRED.name());
 
         //sold-out
-        waitingQueueManager.subscribe(event, new CustomerName("Giuseppe Garibaldi", "Giuseppe", "Garibaldi", event.mustUseFirstAndLastName()), "peppino@garibaldi.com", null, Locale.ENGLISH);
+        waitingQueueManagerSubscription.subscribe(event, new CustomerName("Giuseppe Garibaldi", "Giuseppe", "Garibaldi", event.mustUseFirstAndLastName()), "peppino@garibaldi.com", null, Locale.ENGLISH);
         Thread.sleep(100L);//we are testing ordering, not concurrency...
-        waitingQueueManager.subscribe(event, new CustomerName("Nino Bixio", "Nino", "Bixio", event.mustUseFirstAndLastName()), "bixio@mille.org", null, Locale.ITALIAN);
+        waitingQueueManagerSubscription.subscribe(event, new CustomerName("Nino Bixio", "Nino", "Bixio", event.mustUseFirstAndLastName()), "bixio@mille.org", null, Locale.ITALIAN);
         List<WaitingQueueSubscription> subscriptions = waitingQueueRepository.loadAll(event.getId());
         assertEquals(2, (int) waitingQueueRepository.countWaitingPeople(event.getId()));
         assertTrue(subscriptions.stream().allMatch(w -> w.getSubscriptionType().equals(WaitingQueueSubscription.Type.SOLD_OUT)));

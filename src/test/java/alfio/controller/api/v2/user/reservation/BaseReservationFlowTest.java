@@ -19,6 +19,7 @@ package alfio.controller.api.v2.user.reservation;
 import alfio.config.authentication.support.APITokenAuthentication;
 import alfio.controller.IndexController;
 import alfio.controller.api.admin.AdditionalServiceApiController;
+import alfio.controller.api.admin.AdditionalServiceApiControllerPostMapping;
 import alfio.controller.api.admin.CheckInApiController;
 import alfio.controller.api.admin.EventApiController;
 import alfio.controller.api.admin.UsersApiController;
@@ -147,6 +148,8 @@ public abstract class BaseReservationFlowTest extends BaseIntegrationTest {
     protected final PromoCodeDiscountRepository promoCodeDiscountRepository;
     protected final PromoCodeRequestManager promoCodeRequestManager;
     protected final ExportManager exportManager;
+    protected final AdditionalServiceApiControllerPostMapping additionalServiceApiControllerPostMapping;
+
 
     private Integer additionalServiceId;
 
@@ -190,7 +193,8 @@ public abstract class BaseReservationFlowTest extends BaseIntegrationTest {
                                       OrganizationDeleter organizationDeleter,
                                       PromoCodeDiscountRepository promoCodeDiscountRepository,
                                       PromoCodeRequestManager promoCodeRequestManager,
-                                      ExportManager exportManager) {
+                                      ExportManager exportManager,
+                                      AdditionalServiceApiControllerPostMapping additionalServiceApiControllerPostMapping) {
         this.configurationRepository = configurationRepository;
         this.eventManager = eventManager;
         this.eventRepository = eventRepository;
@@ -227,6 +231,7 @@ public abstract class BaseReservationFlowTest extends BaseIntegrationTest {
         this.promoCodeDiscountRepository = promoCodeDiscountRepository;
         this.promoCodeRequestManager = promoCodeRequestManager;
         this.exportManager = exportManager;
+        this.additionalServiceApiControllerPostMapping = additionalServiceApiControllerPostMapping;
     }
 
     private void ensureConfiguration(ReservationFlowContext context) {
@@ -268,7 +273,7 @@ public abstract class BaseReservationFlowTest extends BaseIntegrationTest {
             AdditionalService.AdditionalServiceType.SUPPLEMENT,
             AdditionalService.SupplementPolicy.OPTIONAL_MAX_AMOUNT_PER_TICKET
         );
-        var addServRes = additionalServiceApiController.insert(context.event.getId(), addServ, new BeanPropertyBindingResult(addServ, "additionalService"));
+        var addServRes = additionalServiceApiControllerPostMapping.insert(context.event.getId(), addServ, new BeanPropertyBindingResult(addServ, "additionalService"));
         assertNotNull(addServRes.getBody());
         additionalServiceId = addServRes.getBody().getId();
         //

@@ -17,6 +17,7 @@
 package alfio.manager.system;
 
 import alfio.model.Configurable;
+import alfio.model.PurchaseContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import alfio.repository.user.OrganizationRepository;
@@ -36,12 +37,16 @@ class MockMailer extends BaseMailer {
     private final ConfigurationManager configurationManager;
     private final Environment environment;
 
+    private final PurchaseContext purchaseContext;
+
     MockMailer(ConfigurationManager configurationManager,
                Environment environment,
-               OrganizationRepository organizationRepository) {
+               OrganizationRepository organizationRepository,
+               PurchaseContext purchaseContext) {
         super(organizationRepository);
         this.configurationManager = configurationManager;
         this.environment = environment;
+        this.purchaseContext = purchaseContext;
     }
 
     @Override
@@ -57,7 +62,7 @@ class MockMailer extends BaseMailer {
 
         var conf = configurationManager.getFor(EnumSet.of(MAIL_REPLY_TO, MAIL_SET_ORG_REPLY_TO), configurable.getConfigurationLevel());
         var replyTo = new AtomicReference<String>(null);
-        setReplyToIfPresent(conf, configurable.getOrganizationId(), replyTo::set);
+        setReplyToIfPresent(conf, purchaseContext.getOrganizationId(), replyTo::set);
 
         log.info("Email: from: {}, replyTo: {}, to: {}, cc: {}, subject: {}, text: {}, html: {}, attachments: {}",
             fromName,

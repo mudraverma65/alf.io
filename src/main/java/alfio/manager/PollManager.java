@@ -163,15 +163,15 @@ public class PollManager {
             });
     }
 
-    private void updatePollProperties(PollModification form, Poll existingPoll, Event event) {
+    private void updatePollProperties(PollModification form, Poll existingPoll, EventAndOrganizationId event) {
         var tags = existingPoll.allowedTags();
         if (form.isAccessRestricted() == existingPoll.allowedTags().isEmpty()) {
             tags = form.isAccessRestricted() ? List.of(UUID.randomUUID().toString()) : List.of();
         }
-        Validate.isTrue(pollRepository.update(form.getTitle(), form.getDescription(), tags, form.getOrder(), existingPoll.getId(), event.getId()) == 1);
+        Validate.isTrue(pollRepository.update(form.getTitle(), form.getDescription(), tags, form.getOrder(), form.getId(), event.getId()) == 1);
     }
 
-    private void updatePollOptions(PollModification form, Event event, Long pollId) {
+    private void updatePollOptions(PollModification form, EventAndOrganizationId event, Long pollId) {
         // Insert new options
         var newOptions = form.getOptions().stream().filter(pm -> pm.getId() == null).collect(Collectors.toList());
         if (!newOptions.isEmpty()) {
@@ -183,14 +183,6 @@ public class PollManager {
         if (!existingOptions.isEmpty()) {
             updateOptions(existingOptions, event, pollId);
         }
-    }
-
-    private void insertOptions(List<PollOptionModification> newOptions, Event event, Long pollId) {
-        // Logic for inserting new options
-    }
-
-    private void updateOptions(List<PollOptionModification> existingOptions, Event event, Long pollId) {
-        // Logic for updating existing options
     }
 
 

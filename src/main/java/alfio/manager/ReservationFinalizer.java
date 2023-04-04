@@ -86,7 +86,7 @@ public class ReservationFinalizer {
     private final TicketRepository ticketRepository;
     private final ReservationEmailContentHelper reservationOperationHelper;
     private final SpecialPriceRepository specialPriceRepository;
-    private final WaitingQueueManager waitingQueueManager;
+    private final WaitingQueueManagerReservation waitingQueueManagerReservation;
     private final TicketCategoryRepository ticketCategoryRepository;
     private final ReservationCostCalculator reservationCostCalculator;
     private final BillingDocumentManager billingDocumentManager;
@@ -110,7 +110,7 @@ public class ReservationFinalizer {
                                 TicketRepository ticketRepository,
                                 ReservationEmailContentHelper reservationEmailContentHelper,
                                 SpecialPriceRepository specialPriceRepository,
-                                WaitingQueueManager waitingQueueManager,
+                                WaitingQueueManagerReservation waitingQueueManagerReservation,
                                 TicketCategoryRepository ticketCategoryRepository,
                                 ReservationCostCalculator reservationCostCalculator,
                                 BillingDocumentManager billingDocumentManager,
@@ -130,7 +130,7 @@ public class ReservationFinalizer {
         this.ticketRepository = ticketRepository;
         this.reservationOperationHelper = reservationEmailContentHelper;
         this.specialPriceRepository = specialPriceRepository;
-        this.waitingQueueManager = waitingQueueManager;
+        this.waitingQueueManagerReservation = waitingQueueManagerReservation;
         this.ticketCategoryRepository = ticketCategoryRepository;
         this.reservationCostCalculator = reservationCostCalculator;
         this.billingDocumentManager = billingDocumentManager;
@@ -310,7 +310,7 @@ public class ReservationFinalizer {
 
         Validate.isTrue(updatedReservation == 1, "expected exactly one updated reservation, got " + updatedReservation);
 
-        waitingQueueManager.fireReservationConfirmed(reservationId);
+        waitingQueueManagerReservation.fireReservationConfirmed(reservationId);
         //we must notify the plugins about ticket assignment and send them by email
         TicketReservation reservation = findById(reservationId).orElseThrow(IllegalStateException::new);
         List<Ticket> assignedTickets = findTicketsInReservation(reservationId);

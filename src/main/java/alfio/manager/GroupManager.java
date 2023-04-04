@@ -249,7 +249,7 @@ public class GroupManager {
                 throw new DuplicateGroupItemException(error.getDescription());
             }
         }
-        groupRepository.updateGroup(listId, escapeHtml4(modification.getName()), escapeHtml4(modification.getDescription()));
+        groupRepository.update(listId, escapeHtml4(modification.getName()), escapeHtml4(modification.getDescription()));
         return loadComplete(listId);
     }
 

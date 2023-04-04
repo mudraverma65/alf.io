@@ -73,7 +73,7 @@ class TicketReservationManagerUnitTest {
     private MessageSourceManager messageSourceManager;
     private TemplateManager templateManager;
     private PlatformTransactionManager transactionManager;
-    private WaitingQueueManager waitingQueueManager;
+    private WaitingQueueManagerReservation waitingQueueManagerReservation;
     private TicketFieldRepository ticketFieldRepository;
     private AdditionalServiceRepository additionalServiceRepository;
     private AdditionalServiceItemRepository additionalServiceItemRepository;
@@ -113,7 +113,7 @@ class TicketReservationManagerUnitTest {
         messageSourceManager = mock(MessageSourceManager.class);
         templateManager = mock(TemplateManager.class);
         transactionManager = mock(PlatformTransactionManager.class);
-        waitingQueueManager = mock(WaitingQueueManager.class);
+        waitingQueueManagerReservation = mock(WaitingQueueManagerReservation.class);
         ticketFieldRepository = mock(TicketFieldRepository.class);
         additionalServiceRepository = mock(AdditionalServiceRepository.class);
         additionalServiceItemRepository = mock(AdditionalServiceItemRepository.class);
@@ -146,7 +146,7 @@ class TicketReservationManagerUnitTest {
             messageSourceManager,
             templateManager,
             transactionManager,
-            waitingQueueManager,
+            waitingQueueManagerReservation,
             ticketFieldRepository,
             additionalServiceRepository,
             additionalServiceItemRepository,
@@ -168,6 +168,7 @@ class TicketReservationManagerUnitTest {
             reservationCostCalculator,
             mock(ReservationEmailContentHelper.class),
             mock(ReservationFinalizer.class),
+            mock(ReservationEmailContentHelper.class),
             mock(OrderSummaryGenerator.class));
     }
 

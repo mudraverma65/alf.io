@@ -48,7 +48,7 @@ public class WaitingQueueSubscriptionProcessorTest {
     private EventManager eventManager;
     private TicketReservationManager ticketReservationManager;
     private ConfigurationManager configurationManager;
-    private WaitingQueueManager waitingQueueManager;
+    private WaitingQueueManagerReservation waitingQueueManagerReservation;
     private NotificationManager notificationManager;
     private MessageSource messageSource;
     private TemplateManager templateManager;
@@ -67,7 +67,6 @@ public class WaitingQueueSubscriptionProcessorTest {
         eventManager = mock(EventManager.class);
         ticketReservationManager = mock(TicketReservationManager.class);
         configurationManager = mock(ConfigurationManager.class);
-        waitingQueueManager = mock(WaitingQueueManager.class);
         notificationManager = mock(NotificationManager.class);
         messageSource = mock(MessageSource.class);
         messageSourceManager = mock(MessageSourceManager.class);
@@ -87,13 +86,13 @@ public class WaitingQueueSubscriptionProcessorTest {
         processor = new WaitingQueueSubscriptionProcessor(eventManager,
             ticketReservationManager,
             configurationManager,
-            waitingQueueManager,
             notificationManager,
             waitingQueueRepository,
             messageSourceManager,
             templateManager,
             ticketRepository,
             transactionManager,
+            waitingQueueManagerReservation,
             clockProvider());
     }
 
@@ -106,7 +105,7 @@ public class WaitingQueueSubscriptionProcessorTest {
             ));
 
         processor.handleWaitingTickets();
-        verify(waitingQueueManager, never()).distributeSeats(eq(event));
+        verify(waitingQueueManagerReservation, never()).distributeSeats(eq(event));
     }
 
     @Test
@@ -122,7 +121,7 @@ public class WaitingQueueSubscriptionProcessorTest {
         when(subscription.getLocale()).thenReturn(Locale.ENGLISH);
         when(subscription.getEmailAddress()).thenReturn("me");
         ZonedDateTime expiration = ZonedDateTime.now(clockProvider().getClock()).plusDays(1);
-        when(waitingQueueManager.distributeSeats(eq(event))).thenReturn(Stream.of(Triple.of(subscription, reservation, expiration)));
+        when(waitingQueueManagerReservation.distributeSeats(eq(event))).thenReturn(Stream.of(Triple.of(subscription, reservation, expiration)));
         String reservationId = "reservation-id";
         when(ticketReservationManager.createTicketReservation(eq(event), anyList(), anyList(), any(Date.class), eq(Optional.empty()), any(Locale.class), eq(true), isNull())).thenReturn(reservationId);
         processor.handleWaitingTickets();

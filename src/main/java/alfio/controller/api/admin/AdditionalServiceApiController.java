@@ -82,7 +82,7 @@ public class AdditionalServiceApiController {
         return new ResponseEntity<>("internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private static PriceContainer buildPriceContainer(final Event event, final AdditionalService as) {
+    static PriceContainer buildPriceContainer(final Event event, final AdditionalService as) {
         return new PriceContainer() {
             @Override
             public int getSrcPriceCts() {

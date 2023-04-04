@@ -82,7 +82,7 @@ class WaitingQueueProcessorMultiThreadedIntegrationTest {
     @Autowired
     private WaitingQueueSubscriptionProcessor waitingQueueSubscriptionProcessor;
     @Autowired
-    private WaitingQueueManager waitingQueueManager;
+    private WaitingQueueManagerSubscription waitingQueueManagerSubscription;
     @Autowired
     private WaitingQueueRepository waitingQueueRepository;
     @Autowired
@@ -109,8 +109,8 @@ class WaitingQueueProcessorMultiThreadedIntegrationTest {
                     DESCRIPTION, BigDecimal.TEN, false, "", false, null, null, null, null, null, 0, null, null, AlfioMetadata.empty()));
             Pair<Event, String> pair = initEvent(categories, organizationRepository, userManager, eventManager, eventRepository);
             event = pair.getKey();
-            waitingQueueManager.subscribe(event, new CustomerName("Giuseppe Garibaldi", "Giuseppe", "Garibaldi", event.mustUseFirstAndLastName()), "peppino@garibaldi.com", null, Locale.ENGLISH);
-            waitingQueueManager.subscribe(event, new CustomerName("Nino Bixio", "Nino", "Bixio", event.mustUseFirstAndLastName()), "bixio@mille.org", null, Locale.ITALIAN);
+            waitingQueueManagerSubscription.subscribe(event, new CustomerName("Giuseppe Garibaldi", "Giuseppe", "Garibaldi", event.mustUseFirstAndLastName()), "peppino@garibaldi.com", null, Locale.ENGLISH);
+            waitingQueueManagerSubscription.subscribe(event, new CustomerName("Nino Bixio", "Nino", "Bixio", event.mustUseFirstAndLastName()), "bixio@mille.org", null, Locale.ITALIAN);
             assertEquals(2, (int) waitingQueueRepository.countWaitingPeople(event.getId()));
 
 

@@ -86,7 +86,7 @@ public class GroupApiController {
         if(notOwner(principal.getName(), organizationId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return groupManager.update(listId, modification).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return groupManager.updateGroup(listId, modification).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/for/{organizationId}/new")

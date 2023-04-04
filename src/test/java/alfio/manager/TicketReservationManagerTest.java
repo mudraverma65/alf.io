@@ -120,7 +120,7 @@ class TicketReservationManagerTest {
     private PaymentManager paymentManager;
     private SpecialPriceRepository specialPriceRepository;
     private TransactionRepository transactionRepository;
-    private WaitingQueueManager waitingQueueManager;
+    private WaitingQueueManagerReservation waitingQueueManagerReservation;
     private Event event;
     private SpecialPrice specialPrice;
     private TicketCategory ticketCategory;
@@ -168,7 +168,7 @@ class TicketReservationManagerTest {
         transactionRepository = mock(TransactionRepository.class);
         TemplateManager templateManager = mock(TemplateManager.class);
         PlatformTransactionManager transactionManager = mock(PlatformTransactionManager.class);
-        waitingQueueManager = mock(WaitingQueueManager.class);
+        waitingQueueManagerReservation = mock(WaitingQueueManagerReservation.class);
         AdditionalServiceRepository additionalServiceRepository = mock(AdditionalServiceRepository.class);
         AdditionalServiceTextRepository additionalServiceTextRepository = mock(AdditionalServiceTextRepository.class);
         AdditionalServiceItemRepository additionalServiceItemRepository = mock(AdditionalServiceItemRepository.class);
@@ -226,7 +226,7 @@ class TicketReservationManagerTest {
         reservationFinalizer = new ReservationFinalizer(transactionManager,
             ticketReservationRepository, userRepository, extensionManager, auditingRepository, TestUtil.clockProvider(),
             configurationManager, null, ticketRepository, reservationHelper, specialPriceRepository,
-            waitingQueueManager, ticketCategoryRepository, reservationCostCalculator, billingDocumentManager, additionalServiceItemRepository,
+            waitingQueueManagerReservation, ticketCategoryRepository, reservationCostCalculator, billingDocumentManager, additionalServiceItemRepository,
             osm, transactionRepository, mock(AdminJobQueueRepository.class), purchaseContextManager, mock(Json.class));
         trm = new TicketReservationManager(eventRepository,
             organizationRepository,
@@ -243,7 +243,7 @@ class TicketReservationManagerTest {
             messageSourceManager,
             templateManager,
             transactionManager,
-            waitingQueueManager,
+            waitingQueueManagerReservation,
             ticketFieldRepository,
             additionalServiceRepository,
             additionalServiceItemRepository,
@@ -265,6 +265,7 @@ class TicketReservationManagerTest {
             reservationCostCalculator,
             reservationHelper,
             reservationFinalizer,
+            reservationHelper,
             osm);
 
         when(event.getId()).thenReturn(EVENT_ID);
@@ -682,7 +683,7 @@ class TicketReservationManagerTest {
         when(ticketReservationRepository.findExpiredReservationForUpdate(eq(now))).thenReturn(Collections.emptyList());
         trm.cleanupExpiredReservations(now);
         verify(ticketReservationRepository).findExpiredReservationForUpdate(eq(now));
-        verifyNoMoreInteractions(ticketReservationRepository, specialPriceRepository, ticketRepository, waitingQueueManager);
+        verifyNoMoreInteractions(ticketReservationRepository, specialPriceRepository, ticketRepository, waitingQueueManagerReservation);
     }
 
     @Test
@@ -696,7 +697,7 @@ class TicketReservationManagerTest {
         verify(ticketRepository).resetCategoryIdForUnboundedCategories(reservationIds);
         verify(ticketRepository).freeFromReservation(reservationIds);
         verify(ticketReservationRepository).remove(reservationIds);
-        verify(waitingQueueManager).cleanExpiredReservations(reservationIds);
+        verify(waitingQueueManagerReservation).cleanExpiredReservations(reservationIds);
         verify(ticketReservationRepository).getReservationIdAndEventId(reservationIds);
         verify(ticketReservationRepository).findReservationsWithPendingTransaction(reservationIds);
         verifyNoMoreInteractions(ticketReservationRepository, specialPriceRepository, ticketRepository);
@@ -918,7 +919,7 @@ class TicketReservationManagerTest {
             }
             verify(ticketRepository, never()).updateTicketsStatusWithReservationId(RESERVATION_ID, TicketStatus.ACQUIRED.toString());
             verify(ticketReservationRepository, never()).updateTicketReservation(eq(RESERVATION_ID), eq(TicketReservationStatus.COMPLETE.toString()), anyString(), anyString(), isNull(), isNull(), anyString(), anyString(), any(), eq(PaymentProxy.STRIPE.toString()), isNull());
-            verify(waitingQueueManager, never()).fireReservationConfirmed(RESERVATION_ID);
+            verify(waitingQueueManagerReservation, never()).fireReservationConfirmed(RESERVATION_ID);
             verify(ticketReservationRepository, never()).setInvoiceNumber(eq(RESERVATION_ID), any());
         } else {
             Assertions.assertFalse(result.isSuccessful());
@@ -980,7 +981,7 @@ class TicketReservationManagerTest {
         verify(applicationEventPublisher).publishEvent(new FinalizeReservation(spec, PaymentProxy.ON_SITE, true, true, null, PENDING));
         verify(ticketRepository, never()).updateTicketsStatusWithReservationId(RESERVATION_ID, TicketStatus.ACQUIRED.toString());
         verify(ticketReservationRepository, never()).updateTicketReservation(eq(RESERVATION_ID), eq(TicketReservationStatus.COMPLETE.toString()), anyString(), anyString(), isNull(), isNull(), anyString(), anyString(), any(), eq(PaymentProxy.ON_SITE.toString()), isNull());
-        verify(waitingQueueManager, never()).fireReservationConfirmed(RESERVATION_ID);
+        verify(waitingQueueManagerReservation, never()).fireReservationConfirmed(RESERVATION_ID);
         verify(ticketReservationRepository, never()).setInvoiceNumber(eq(RESERVATION_ID), any());
         verify(ticketReservationRepository).findReservationByIdForUpdate(eq(RESERVATION_ID));
         verify(ticketReservationRepository, atLeastOnce()).findReservationById(RESERVATION_ID);
@@ -1008,7 +1009,7 @@ class TicketReservationManagerTest {
         PaymentResult result = trm.performPayment(spec, new TotalPrice(100, 0, 0, 0,"CHF"), PaymentProxy.OFFLINE, PaymentMethod.BANK_TRANSFER, null);
         Assertions.assertTrue(result.isSuccessful());
         Assertions.assertEquals(Optional.of(TicketReservationManager.NOT_YET_PAID_TRANSACTION_ID), result.getGatewayId());
-        verify(waitingQueueManager, never()).fireReservationConfirmed(eq(RESERVATION_ID));
+        verify(waitingQueueManagerReservation, never()).fireReservationConfirmed(eq(RESERVATION_ID));
         verify(ticketReservationRepository).findReservationByIdForUpdate(eq(RESERVATION_ID));
         verify(billingDocumentManager, never()).generateInvoiceNumber(eq(spec), any());
         verify(ticketReservationRepository, never()).setInvoiceNumber(RESERVATION_ID, invoiceNumber);
@@ -1066,7 +1067,7 @@ class TicketReservationManagerTest {
         verify(ticketReservationRepository).confirmOfflinePayment(eq(RESERVATION_ID), eq(COMPLETE.toString()), any(ZonedDateTime.class));
         verify(ticketRepository).updateTicketsStatusWithReservationId(eq(RESERVATION_ID), eq(TicketStatus.ACQUIRED.toString()));
         verify(ticketReservationRepository).updateTicketReservation(eq(RESERVATION_ID), eq(TicketReservationStatus.COMPLETE.toString()), anyString(), anyString(), isNull(), isNull(), anyString(), isNull(), any(), eq(PaymentProxy.OFFLINE.toString()), isNull());
-        verify(waitingQueueManager).fireReservationConfirmed(eq(RESERVATION_ID));
+        verify(waitingQueueManagerReservation).fireReservationConfirmed(eq(RESERVATION_ID));
         verify(ticketRepository, atLeastOnce()).findTicketsInReservation(RESERVATION_ID);
         verify(specialPriceRepository).updateStatusForReservation(eq(singletonList(RESERVATION_ID)), eq(SpecialPrice.Status.TAKEN.toString()));
         verify(reservationHelper).sendConfirmationEmail(event, copy, Locale.ENGLISH, "username");
@@ -1426,7 +1427,7 @@ class TicketReservationManagerTest {
             verify(ticketRepository).resetCategoryIdForUnboundedCategories(expiredReservationIds);
             verify(ticketRepository).freeFromReservation(expiredReservationIds);
             verify(ticketReservationRepository).remove(expiredReservationIds);
-            verify(waitingQueueManager).cleanExpiredReservations(expiredReservationIds);
+            verify(waitingQueueManagerReservation).cleanExpiredReservations(expiredReservationIds);
             verify(ticketReservationRepository).getReservationIdAndEventId(expiredReservationIds);
             verify(ticketReservationRepository).findReservationsWithPendingTransaction(reservationIds);
             verify(ticketReservationRepository).findOptionalStatusAndValidationById(PENDING_RESERVATION_ID);
@@ -1456,7 +1457,7 @@ class TicketReservationManagerTest {
             verify(ticketRepository).resetCategoryIdForUnboundedCategories(reservationIds);
             verify(ticketRepository).freeFromReservation(reservationIds);
             verify(ticketReservationRepository).remove(reservationIds);
-            verify(waitingQueueManager).cleanExpiredReservations(reservationIds);
+            verify(waitingQueueManagerReservation).cleanExpiredReservations(reservationIds);
             verify(ticketReservationRepository).getReservationIdAndEventId(reservationIds);
             verify(transactionRepository).deleteForReservationsWithStatus(List.of(PENDING_RESERVATION_ID), Transaction.Status.PENDING);
             verify(ticketReservationRepository).findOptionalReservationById(PENDING_RESERVATION_ID);
@@ -1482,7 +1483,7 @@ class TicketReservationManagerTest {
             finalizer = new ReservationFinalizer(mock(PlatformTransactionManager.class),
                 ticketReservationRepository, userRepository, mock(ExtensionManager.class), auditingRepository, mock(ClockProvider.class), configurationManager,
                 mock(SubscriptionRepository.class), ticketRepository, reservationHelper, mock(SpecialPriceRepository.class),
-                waitingQueueManager, ticketCategoryRepository, mock(ReservationCostCalculator.class), billingDocumentManager, mock(AdditionalServiceItemRepository.class),
+                waitingQueueManagerReservation, ticketCategoryRepository, mock(ReservationCostCalculator.class), billingDocumentManager, mock(AdditionalServiceItemRepository.class),
                 mock(OrderSummaryGenerator.class), transactionRepository, mock(AdminJobQueueRepository.class), purchaseContextManager, mock(Json.class));
             sendReservationEmailIfNecessary = mock(MaybeConfiguration.class);
             sendTickets = mock(MaybeConfiguration.class);

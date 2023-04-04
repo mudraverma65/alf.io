@@ -17,6 +17,7 @@
 package alfio.manager.system;
 
 import alfio.model.Configurable;
+import alfio.model.PurchaseContext;
 import alfio.model.system.ConfigurationKeys;
 import alfio.repository.user.OrganizationRepository;
 import alfio.util.HttpUtils;
@@ -44,6 +45,8 @@ class SendGridMailer extends BaseMailer {
     private final HttpClient client;
     private final ConfigurationManager configurationManager;
 
+    private PurchaseContext purchaseContext;
+
     SendGridMailer(HttpClient client,
                           ConfigurationManager configurationManager,
                           OrganizationRepository organizationRepository) {
@@ -67,7 +70,7 @@ class SendGridMailer extends BaseMailer {
         payload.put("from", Map.of(EMAIL, from, "name", fromName));
         payload.put("personalizations", personalizations);
         payload.put("content", contents);
-        setReplyToIfPresent(config, configurable.getOrganizationId(),
+        setReplyToIfPresent(config, purchaseContext.getOrganizationId(),
             replyTo -> payload.put("reply_to", Map.of(EMAIL, replyTo)));
         //prepare request
         final var body = Json.GSON.toJson(payload);

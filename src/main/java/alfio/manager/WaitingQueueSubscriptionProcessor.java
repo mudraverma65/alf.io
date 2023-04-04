@@ -58,7 +58,7 @@ public class WaitingQueueSubscriptionProcessor {
     private final EventManager eventManager;
     private final TicketReservationManager ticketReservationManager;
     private final ConfigurationManager configurationManager;
-    private final WaitingQueueManager waitingQueueManager;
+    private final WaitingQueueManagerReservation waitingQueueManagerReservation;
     private final NotificationManager notificationManager;
     private final WaitingQueueRepository waitingQueueRepository;
     private final MessageSourceManager messageSourceManager;
@@ -70,18 +70,18 @@ public class WaitingQueueSubscriptionProcessor {
     public WaitingQueueSubscriptionProcessor(EventManager eventManager,
                                              TicketReservationManager ticketReservationManager,
                                              ConfigurationManager configurationManager,
-                                             WaitingQueueManager waitingQueueManager,
                                              NotificationManager notificationManager,
                                              WaitingQueueRepository waitingQueueRepository,
                                              MessageSourceManager messageSourceManager,
                                              TemplateManager templateManager,
                                              TicketRepository ticketRepository,
                                              PlatformTransactionManager transactionManager,
+                                             WaitingQueueManagerReservation waitingQueueManagerReservation,
                                              ClockProvider clockProvider) {
         this.eventManager = eventManager;
         this.ticketReservationManager = ticketReservationManager;
         this.configurationManager = configurationManager;
-        this.waitingQueueManager = waitingQueueManager;
+        this.waitingQueueManagerReservation = waitingQueueManagerReservation;
         this.notificationManager = notificationManager;
         this.waitingQueueRepository = waitingQueueRepository;
         this.messageSourceManager = messageSourceManager;
@@ -138,7 +138,7 @@ public class WaitingQueueSubscriptionProcessor {
 
     public void distributeAvailableSeats(Event event) {
         var messageSource = messageSourceManager.getMessageSourceFor(event);
-        waitingQueueManager.distributeSeats(event).forEach(triple -> {
+        waitingQueueManagerReservation.distributeSeats(event).forEach(triple -> {
             WaitingQueueSubscription subscription = triple.getLeft();
             Locale locale = subscription.getLocale();
             ZonedDateTime expiration = triple.getRight();

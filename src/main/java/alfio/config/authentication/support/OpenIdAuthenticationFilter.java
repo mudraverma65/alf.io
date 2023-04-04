@@ -81,14 +81,15 @@ public class OpenIdAuthenticationFilter extends GenericFilterBean {
 
     private void redirectToAuthorization(HttpServletResponse res, HttpServletRequest req) throws IOException {
         if (isPublicAuthenticationRequest(req)) {
-            storePublicAuthenticationRequestInSession(req.getSession(), req.getParameter("reservation"), req.getParameter("contextType"), req.getParameter("id"));
+            storePublicAuthenticationRequestInSession(req, req.getParameter("reservation"), req.getParameter("contextType"), req.getParameter("id"));
         }
 
         log.trace("calling buildAuthorizeUrl");
         res.sendRedirect(openIdAuthenticationManager.buildAuthorizeUrl(UUID.randomUUID().toString()));
     }
 
-    private void storePublicAuthenticationRequestInSession(HttpSession session, String reservation, String contextType, String id) {
+    private void storePublicAuthenticationRequestInSession(HttpServletRequest req, String reservation, String contextType, String id) {
+        var session = req.getSession();
         session.setAttribute(RESERVATION_KEY, reservation);
         session.setAttribute(CONTEXT_TYPE_KEY, contextType);
         session.setAttribute(CONTEXT_ID_KEY, id);

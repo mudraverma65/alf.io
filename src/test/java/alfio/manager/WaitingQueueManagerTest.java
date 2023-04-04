@@ -67,7 +67,7 @@ public class WaitingQueueManagerTest {
     private EventRepository eventRepository;
     private ExtensionManager extensionManager;
     private Event event;
-    private WaitingQueueManager manager;
+    private WaitingQueueManagerReservation manager;
     private final String reservationId = "reservation-id";
     private final int eventId = 1;
 
@@ -89,7 +89,7 @@ public class WaitingQueueManagerTest {
         event = mock(Event.class);
         when(event.getId()).thenReturn(eventId);
         when(event.now(any(ClockProvider.class))).thenCallRealMethod();
-        manager = new WaitingQueueManager(waitingQueueRepository, ticketRepository, ticketCategoryRepository, configurationManager, eventStatisticsManager, notificationManager, templateManager, messageSourceManager, organizationRepository, eventRepository, extensionManager, TestUtil.clockProvider());
+        manager = new WaitingQueueManagerReservation(waitingQueueRepository, ticketRepository, ticketCategoryRepository, configurationManager, eventRepository, TestUtil.clockProvider());
         when(messageSourceManager.getMessageSourceFor(any())).thenReturn(messageSource);
         when(messageSourceManager.getRootMessageSource()).thenReturn(messageSource);
     }

@@ -21,10 +21,7 @@ import alfio.config.DataSourceConfiguration;
 import alfio.config.Initializer;
 import alfio.controller.IndexController;
 import alfio.controller.api.ControllerConfiguration;
-import alfio.controller.api.admin.AdditionalServiceApiController;
-import alfio.controller.api.admin.CheckInApiController;
-import alfio.controller.api.admin.EventApiController;
-import alfio.controller.api.admin.UsersApiController;
+import alfio.controller.api.admin.*;
 import alfio.controller.api.v1.AttendeeApiController;
 import alfio.controller.api.v2.InfoApiController;
 import alfio.controller.api.v2.TranslationsApiController;
@@ -115,7 +112,8 @@ class DiscountedReservationFlowIntegrationTest extends BaseReservationFlowTest {
                                                     PromoCodeRequestManager promoCodeRequestManager,
                                                     OrganizationRepository organizationRepository,
                                                     UserManager userManager,
-                                                    ExportManager exportManager) {
+                                                    ExportManager exportManager,
+                                                    AdditionalServiceApiControllerPostMapping additionalServiceApiControllerPostMapping) {
         super(configurationRepository,
             eventManager,
             eventRepository,
@@ -151,7 +149,8 @@ class DiscountedReservationFlowIntegrationTest extends BaseReservationFlowTest {
             organizationDeleter,
             promoCodeDiscountRepository,
             promoCodeRequestManager,
-            exportManager);
+            exportManager,
+            additionalServiceApiControllerPostMapping);
         this.organizationRepository = organizationRepository;
         this.userManager = userManager;
     }

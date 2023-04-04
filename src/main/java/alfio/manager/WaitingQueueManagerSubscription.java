@@ -50,7 +50,7 @@ import static alfio.util.EventUtil.determineAvailableSeats;
 @Component
 public class WaitingQueueManagerSubscription {
 
-    private static final Logger log = LoggerFactory.getLogger(WaitingQueueManager.class);
+    private static final Logger log = LoggerFactory.getLogger(WaitingQueueManagerSubscription.class);
 
     private final WaitingQueueRepository waitingQueueRepository;
     private final TicketCategoryRepository ticketCategoryRepository;

@@ -181,7 +181,7 @@ class GroupManagerIntegrationTest extends BaseIntegrationTest {
         assertTrue(items.isSuccess());
         var persistedGroup = groupManager.loadComplete(group.getId()).orElseThrow();
         assertEquals("description &lt;&gt;", persistedGroup.getItems().get(0).getDescription());
-        groupManager.update(group.getId(), new GroupModification(group.getId(), "test > 1", "This is a test < 1", event.getOrganizationId(), List.of(new GroupMemberModification(null,"test@test.ch", "description <>"))));
+        groupManager.updateGroup(group.getId(), new GroupModification(group.getId(), "test > 1", "This is a test < 1", event.getOrganizationId(), List.of(new GroupMemberModification(null,"test@test.ch", "description <>"))));
         persistedGroup = groupManager.loadComplete(group.getId()).orElseThrow();
         assertEquals("This is a test &lt; 1", persistedGroup.getDescription());
         assertEquals("test &gt; 1", persistedGroup.getName());

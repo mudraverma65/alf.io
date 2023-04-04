@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import alfio.controller.api.admin.AdditionalServiceApiController;
 
 import static java.util.Objects.requireNonNullElse;
 
@@ -61,12 +62,17 @@ public class AdditionalServiceApiControllerGetMapping {
     private final EventRepository eventRepository;
     private final AdditionalServiceManager additionalServiceManager;
 
-    public AdditionalServiceApiController(EventManager eventManager,
+    private final AdditionalServiceApiController additionalServiceApiController;
+
+
+    public AdditionalServiceApiControllerGetMapping(EventManager eventManager,
                                           EventRepository eventRepository,
+                                                    AdditionalServiceApiController additionalServiceApiController,
                                           AdditionalServiceManager additionalServiceManager) {
         this.eventManager = eventManager;
         this.eventRepository = eventRepository;
         this.additionalServiceManager = additionalServiceManager;
+        this.additionalServiceApiController = additionalServiceApiController;
     }
     @ExceptionHandler({IllegalArgumentException.class})
     public ResponseEntity<String> handleBadRequest(Exception e) {
@@ -88,7 +94,7 @@ public class AdditionalServiceApiControllerGetMapping {
                             .map(as -> EventModification.AdditionalService.from(as)//.withAdditionalFields() TODO to be implemented
                                             .withText(additionalServiceManager.findAllTextByAdditionalServiceId(as.getId()))
                                             .withZoneId(event.getZoneId())
-                                            .withPriceContainer(buildPriceContainer(event, as)).build())
+                                            .withPriceContainer(additionalServiceApiController.buildPriceContainer(event, as)).build())
                             .collect(Collectors.toList()))
             .orElse(Collections.emptyList());
     }

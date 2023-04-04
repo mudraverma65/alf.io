@@ -59,7 +59,7 @@ public class ConfigurationApiControllerInvoice {
     public ConfigurationApiControllerInvoice(BillingDocumentManager billingDocumentManager,
                                       AdminJobManager adminJobManager,
                                       EventManager eventManager,
-                                      ClockProvider clockProvider,) {
+                                      ClockProvider clockProvider) {
         this.billingDocumentManager = billingDocumentManager;
         this.adminJobManager = adminJobManager;
         this.eventManager = eventManager;

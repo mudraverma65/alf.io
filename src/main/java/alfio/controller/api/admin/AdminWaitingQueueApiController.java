@@ -20,7 +20,7 @@ import alfio.controller.decorator.SaleableTicketCategory;
 import alfio.manager.EventManager;
 import alfio.manager.EventStatisticsManager;
 import alfio.manager.TicketReservationManager;
-import alfio.manager.WaitingQueueManager;
+import alfio.manager.WaitingQueueManagerSubscription;
 import alfio.manager.system.ConfigurationManager;
 import alfio.model.Event;
 import alfio.model.WaitingQueueSubscription;
@@ -49,20 +49,20 @@ import static java.util.Collections.singletonList;
 @RequestMapping("/admin/api/event/{eventName}/waiting-queue")
 public class AdminWaitingQueueApiController {
 
-    private final WaitingQueueManager waitingQueueManager;
+    private final WaitingQueueManagerSubscription waitingQueueManagerSubscription;
     private final EventManager eventManager;
     private final TicketReservationManager ticketReservationManager;
     private final ConfigurationManager configurationManager;
     private final EventStatisticsManager eventStatisticsManager;
     private final ClockProvider clockProvider;
 
-    public AdminWaitingQueueApiController(WaitingQueueManager waitingQueueManager,
+    public AdminWaitingQueueApiController(WaitingQueueManagerSubscription waitingQueueManagerSubscription,
                                           EventManager eventManager,
                                           TicketReservationManager ticketReservationManager,
                                           ConfigurationManager configurationManager,
                                           EventStatisticsManager eventStatisticsManager,
                                           ClockProvider clockProvider) {
-        this.waitingQueueManager = waitingQueueManager;
+        this.waitingQueueManagerSubscription = waitingQueueManagerSubscription;
         this.eventManager = eventManager;
         this.ticketReservationManager = ticketReservationManager;
         this.configurationManager = configurationManager;
@@ -106,7 +106,7 @@ public class AdminWaitingQueueApiController {
     @GetMapping("/count")
     public Integer countWaitingPeople(@PathVariable("eventName") String eventName, Principal principal, HttpServletResponse response) {
         Optional<Integer> count = eventManager.getOptionalEventAndOrganizationIdByName(eventName, principal.getName())
-            .map(e -> waitingQueueManager.countSubscribers(e.getId()));
+            .map(e -> waitingQueueManagerSubscription.countSubscribers(e.getId()));
         if(count.isPresent()) {
             return count.get();
         }
@@ -117,7 +117,7 @@ public class AdminWaitingQueueApiController {
     @GetMapping("/load")
     public List<WaitingQueueSubscription> loadAllSubscriptions(@PathVariable("eventName") String eventName, Principal principal, HttpServletResponse response) {
         Optional<List<WaitingQueueSubscription>> count = eventManager.getOptionalEventAndOrganizationIdByName(eventName, principal.getName())
-            .map(e -> waitingQueueManager.loadAllSubscriptionsForEvent(e.getId()));
+            .map(e -> waitingQueueManagerSubscription.loadAllSubscriptionsForEvent(e.getId()));
         if(count.isPresent()) {
             return count.get();
         }
@@ -130,7 +130,7 @@ public class AdminWaitingQueueApiController {
                                          @RequestParam(name = "format", defaultValue = "excel") String format,
                                          Principal principal, HttpServletResponse response) throws IOException {
         var event = eventManager.getSingleEvent(eventName, principal.getName());
-        var found = waitingQueueManager.loadAllSubscriptionsForEvent(event.getId());
+        var found = waitingQueueManagerSubscription.loadAllSubscriptionsForEvent(event.getId());
 
         var header = new String[] {"Type", "Firstname", "Lastname", "Email", "Language", "Status", "Date"};
         var lines = convertSubscriptions(found, event);
@@ -168,11 +168,11 @@ public class AdminWaitingQueueApiController {
                                                                                Principal principal, WaitingQueueSubscription.Status newStatus,
                                                                                WaitingQueueSubscription.Status currentStatus) {
         return eventManager.getOptionalEventAndOrganizationIdByName(eventName, principal.getName())
-            .flatMap(e -> waitingQueueManager.updateSubscriptionStatus(subscriberId, newStatus, currentStatus).map(s -> Pair.of(s, e)))
+            .flatMap(e -> waitingQueueManagerSubscription.updateSubscriptionStatus(subscriberId, newStatus, currentStatus).map(s -> Pair.of(s, e)))
             .map(pair -> {
                 Map<String, Object> out = new HashMap<>();
                 out.put("modified", pair.getLeft());
-                out.put("list", waitingQueueManager.loadAllSubscriptionsForEvent(pair.getRight().getId()));
+                out.put("list", waitingQueueManagerSubscription.loadAllSubscriptionsForEvent(pair.getRight().getId()));
                 return out;
             })
             .map(ResponseEntity::ok)

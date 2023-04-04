@@ -17,6 +17,7 @@
 package alfio.manager.system;
 
 import alfio.model.Configurable;
+import alfio.model.PurchaseContext;
 import alfio.model.system.ConfigurationKeys;
 import alfio.repository.user.OrganizationRepository;
 import alfio.util.HttpUtils;
@@ -42,6 +43,8 @@ class MailgunMailer extends BaseMailer {
 
     private final HttpClient client;
     private final ConfigurationManager configurationManager;
+
+    private PurchaseContext purchaseContext;
 
     MailgunMailer(HttpClient client,
                   ConfigurationManager configurationManager,
@@ -98,7 +101,7 @@ class MailgunMailer extends BaseMailer {
 
             var emailData = getEmailData(from, to, cc, subject, text, html);
 
-            setReplyToIfPresent(conf, configurable.getOrganizationId(),
+            setReplyToIfPresent(conf, purchaseContext.getOrganizationId(),
                 replyTo -> emailData.put("h:Reply-To", replyTo));
 
             var requestBuilder = HttpRequest.newBuilder()

@@ -415,11 +415,11 @@ public class EventApiController {
             if(fields.contains("Confirmation")) {line.add(reservation.getConfirmationTimestamp().withZoneSameInstant(eventZoneId).toString());}
             if(fields.contains("Billing Address")) {line.add(reservation.getBillingAddress());}
             if(fields.contains("Country Code")) {line.add(reservation.getVatCountryCode());}
-            if((paymentIdRequested = fields.contains("Payment ID")){
-                addPaymentIdToLineIfRequested(line,trs);
+            if(fields.contains("Payment ID")){
+                addPaymentIdToLineIfRequested(line, trs, true);
             }
-            if(paymentGatewayRequested = fields.contains(PAYMENT_METHOD)){
-                addPaymentGatewayToLineIfRequested(line, trs);
+            if(fields.contains(PAYMENT_METHOD)){
+                addPaymentGatewayToLineIfRequested(line, trs, true);
             }
 
             if(eInvoicingEnabled) {
@@ -445,7 +445,7 @@ public class EventApiController {
         });
     }
 
-    public void addPaymentIdToLineIfRequested(Line line, TransactionService trs) {
+    public void addPaymentIdToLineIfRequested(List<String> line, TicketWithReservationAndTransaction trs, Boolean paymentIdRequested) {
         Optional<Transaction> transactionOpt = trs.getTransaction();
         String paymentId = transactionOpt.map(Transaction::getPaymentId).orElse(null);
         String transactionId = transactionOpt.map(Transaction::getTransactionId).orElse("");
@@ -454,7 +454,7 @@ public class EventApiController {
         }
     }
 
-    public void addPaymentGatewayToLineIfRequested(Line line, TransactionService trs) {
+    public void addPaymentGatewayToLineIfRequested(List<String> line, TicketWithReservationAndTransaction trs, Boolean paymentGatewayRequested) {
         Optional<Transaction> transactionOpt = trs.getTransaction();
         String paymentGateway = transactionOpt.map(tr -> tr.getPaymentProxy().name()).orElse("");
         if (paymentGatewayRequested) {

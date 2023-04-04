@@ -17,6 +17,7 @@
 package alfio.manager.system;
 
 import alfio.model.Configurable;
+import alfio.model.PurchaseContext;
 import alfio.repository.user.OrganizationRepository;
 import alfio.util.HttpUtils;
 import alfio.util.Json;
@@ -39,6 +40,8 @@ class MailjetMailer extends BaseMailer  {
 
     private final HttpClient client;
     private final ConfigurationManager configurationManager;
+
+    private PurchaseContext purchaseContext;
 
     MailjetMailer(HttpClient httpClient,
                          ConfigurationManager configurationManager,
@@ -75,7 +78,7 @@ class MailjetMailer extends BaseMailer  {
         html.ifPresent(h -> mailPayload.put("Html-part", h));
         mailPayload.put("Recipients", recipients);
 
-        setReplyToIfPresent(conf, configurable.getOrganizationId(),
+        setReplyToIfPresent(conf, purchaseContext.getOrganizationId(),
             address -> mailPayload.put("Headers", Collections.singletonMap("Reply-To", address)));
 
         if(attachment != null && attachment.length > 0) {

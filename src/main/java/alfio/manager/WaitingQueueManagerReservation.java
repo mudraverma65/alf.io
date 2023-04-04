@@ -50,7 +50,7 @@ import static alfio.util.EventUtil.determineAvailableSeats;
 @Component
 public class WaitingQueueManagerReservation {
 
-    private static final Logger log = LoggerFactory.getLogger(WaitingQueueManager.class);
+    private static final Logger log = LoggerFactory.getLogger(WaitingQueueManagerReservation.class);
 
     private final WaitingQueueRepository waitingQueueRepository;
     private final TicketRepository ticketRepository;
@@ -140,7 +140,14 @@ public class WaitingQueueManagerReservation {
 
 
     private Stream<Triple<WaitingQueueSubscription, TicketReservationWithOptionalCodeModification, ZonedDateTime>> distributeAvailableSeatsPeople(Event event, int waitingPeople, int waitingTickets) {
-        return distributeAvailableSeatsPeople(event, Ticket.TicketStatus.RELEASED, () -> Math.min(waitingPeople, waitingTickets));
+        int numReleasedTickets= 0;
+        if(waitingPeople>waitingTickets){
+            numReleasedTickets = waitingPeople;
+        }
+        else{
+            numReleasedTickets = waitingTickets;
+        }
+        return distributeAvailableSeatsPeople(event, numReleasedTickets, Math.min(waitingPeople, waitingTickets));
     }
 
     private Stream<Triple<WaitingQueueSubscription, TicketReservationWithOptionalCodeModification, ZonedDateTime>> distributeAvailableSeatsStatus(Event event, Ticket.TicketStatus status, IntSupplier availableSeatSupplier) {
