@@ -78,6 +78,7 @@ Original class - https://github.com/alfio-event/alf.io/blob/master/src/main/java
 Changed class - https://github.com/mudraverma65/alf.io/blob/master/src/main/java/alfio/model/Configurable.java  , https://github.com/mudraverma65/alf.io/blob/master/src/main/java/alfio/model/PurchaseContext.java 
 Commit Link - https://github.com/alfio-event/alf.io/commit/8101ad90a9cbd9f71a5bddf650399a17ec027695
 
-Pull Request Status: Rejected
+Final Refactoring Commit - https://github.com/alfio-event/alf.io/commit/359bf38cdc5bf2fb7621a1b97351c7464bd4178d 
 
+Pull Request Status: Rejected
 
